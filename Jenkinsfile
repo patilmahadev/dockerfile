@@ -1,28 +1,29 @@
 pipeline {
-  agent any
-  parameters {
-    string(name: 'BRANCH', defaultValue: 'master')
-    string(name: 'NODEIP', defaultValue: '192.168.1.76')
-  }
-  stages {
-    stage('build') {
-      steps {
-        echo 'building...'
-        git branch: "${params.BRANCH}", url: 'https://github.com/patilmahadev/dockerfile.git'
-      }
+    agent {
+        label 'docker'
     }
-    stage('test') {
-      steps {
-        echo 'testing...'
-        git branch: "${params.BRANCH}", url: 'https://github.com/patilmahadev/dockerfile.git'
-      }
+    parameters {
+        string(name: 'VERSION', defaultValue: '1.2')
+        string(name: 'BRANCH', defaultValue: 'master')
     }
-    stage('deploy') {
-      steps {
-        echo 'deploying...'
-        git branch: "${params.BRANCH}", url: 'https://github.com/patilmahadev/dockerfile.git'
-        sh "scp -i /var/lib/jenkins/secrets/27-may-18-ohio.pem index.html ec2-user@${params.NODEIP}:/var/www/html/"
-      }
+    stages {
+        stage('build') {
+            steps {
+                echo 'building docker image...'
+                git branch: "${params.BRANCH}", url: 'https://github.com/patilmahadev/dockerfile.git'
+                sh "sudo docker build -t patilmahadev/docker-project:${params.VERSION} ."
+            }
+        }
+        stage('test') {
+            steps {
+                echo 'testing docker image...'
+            }
+        }
+        stage('deploy') {
+            steps {
+                echo 'deploying docker image...'
+                sh "sudo docker push patilmahadev/docker-project:${params.VERSION}"
+            }
+        }
     }
-  }
 }
