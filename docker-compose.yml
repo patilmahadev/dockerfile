@@ -1,10 +1,11 @@
-db:
-  image: postgres
-  links:
-    - web
-  ports:
-    - "5432:5432"
-web:
-  image: nginx
-  ports:
-    - "80:80"
+services:
+  app:
+    image: tomcat:7
+    links:
+      - web
+    deploy:
+      replicas: 2
+  web:
+    image: nginx
+    deploy:
+      replicas: 3
